@@ -192,8 +192,8 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
         if (data$dimPCA<nmf.k || data$pca$use.odgenes) {
           tsmessage("... Performing NMF",verbose=verbose)
           tmp = RcppML::nmf(data$gficf,k=nmf.k)
-          data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-          data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+          data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+          data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
           rm(tmp);gc()
         } else {
           tsmessage(paste0("Found NMF reduction with k greaten or equal to ", nmf.k),verbose=T)
