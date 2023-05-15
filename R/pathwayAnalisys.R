@@ -244,7 +244,8 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
   data$scgsea$nes = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
   data$scgsea$pval = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
   data$scgsea$fdr = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
-    
+  
+  rownames(data$scgsea$nmf.w) <- rownames(data$rawCounts)
   rownames(data$scgsea$es) = rownames(data$scgsea$nes) = rownames(data$scgsea$pval) = rownames(data$scgsea$fdr) = names(data$scgsea$pathways)
   
   tsmessage("Performing GSEA...",verbose=verbose)
