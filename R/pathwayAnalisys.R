@@ -206,15 +206,15 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
       } else {
         tsmessage("... Performing NMF",verbose=verbose)
         tmp = RcppML::nmf(data$gficf,k=nmf.k)
-        data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-        data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+        data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+        data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
         rm(tmp);gc()
       }
     } else {
       tsmessage("... Performing NMF",verbose=verbose)
       tmp = RcppML::nmf(log1p(data$rawCounts),k=nmf.k)
-      data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-      data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+      data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+      data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
       rm(tmp);gc()
     }
   } else {
