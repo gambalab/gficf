@@ -29,6 +29,10 @@ armaCorr <- function(m, ncores = 1L, verbose = TRUE, full = FALSE, diag = TRUE, 
     .Call(`_gficf_armaCorr`, m, ncores, verbose, full, diag, dist)
 }
 
+armaColMeans <- function(m, ncores = 1L, verbose = TRUE) {
+    .Call(`_gficf_armaColMeans`, m, ncores, verbose)
+}
+
 rcpp_WMU_test <- function(M, idx1, idx2) {
     .Call(`_gficf_rcpp_WMU_test`, M, idx1, idx2)
 }

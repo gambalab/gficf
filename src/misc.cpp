@@ -125,3 +125,29 @@ arma::sp_mat armaCorr(const arma::mat& m, int ncores=1, bool verbose=true, bool 
   }
   return(d);
 }
+
+// [[Rcpp::export]]
+Rcpp::DataFrame armaColMeans(const arma::sp_mat& m, int ncores=1,bool verbose=true)
+{
+  arma::vec meanV(m.n_cols,arma::fill::zeros); arma::vec meanAll(m.n_cols,arma::fill::zeros); arma::vec nobsV(m.n_cols,arma::fill::zeros);
+  typedef arma::sp_mat::const_col_iterator iter;
+  Progress p(m.n_cols, verbose);
+#pragma omp parallel for num_threads(ncores) shared(meanV,meanAll,nobsV)
+  for(unsigned int i=0;i<m.n_cols;i++) {
+    if ( !Progress::check_abort())
+    {
+      double tot=0; int n=0;
+      for(iter i_iter = m.begin_col(i); i_iter != m.end_col(i); ++i_iter) {
+        tot+=(*i_iter);
+        n++;
+      }
+      if(tot>0) {
+        meanV[i] = tot/n;
+        meanAll[i] = tot/m.n_cols;
+        nobsV[i] = n;
+      }
+      p.increment(); // update progress
+    }
+  }
+  return Rcpp::DataFrame::create(Named("mu1")=meanV,Named("mu2")=meanAll,Named("nobs",nobsV));
+}

@@ -113,6 +113,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// armaColMeans
+Rcpp::DataFrame armaColMeans(const arma::sp_mat& m, int ncores, bool verbose);
+RcppExport SEXP _gficf_armaColMeans(SEXP mSEXP, SEXP ncoresSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type m(mSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(armaColMeans(m, ncores, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_WMU_test
 Rcpp::NumericMatrix rcpp_WMU_test(Rcpp::NumericMatrix M, Rcpp::NumericVector idx1, Rcpp::NumericVector idx2);
 RcppExport SEXP _gficf_rcpp_WMU_test(SEXP MSEXP, SEXP idx1SEXP, SEXP idx2SEXP) {
@@ -162,6 +175,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gficf_colMeanVarS", (DL_FUNC) &_gficf_colMeanVarS, 2},
     {"_gficf_armaManhattan", (DL_FUNC) &_gficf_armaManhattan, 5},
     {"_gficf_armaCorr", (DL_FUNC) &_gficf_armaCorr, 6},
+    {"_gficf_armaColMeans", (DL_FUNC) &_gficf_armaColMeans, 3},
     {"_gficf_rcpp_WMU_test", (DL_FUNC) &_gficf_rcpp_WMU_test, 3},
     {"_gficf_rcpp_parallel_jaccard_coef", (DL_FUNC) &_gficf_rcpp_parallel_jaccard_coef, 2},
     {"_gficf_rcpp_parallel_WMU_test", (DL_FUNC) &_gficf_rcpp_parallel_WMU_test, 3},
