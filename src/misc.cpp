@@ -151,3 +151,47 @@ Rcpp::DataFrame armaColMeans(const arma::sp_mat& m, int ncores=1,bool verbose=tr
   }
   return Rcpp::DataFrame::create(Named("mu1")=meanV,Named("mu2")=meanAll,Named("nobs",nobsV));
 }
+
+// [[Rcpp::export]]
+arma::sp_mat scaleUMI(const arma::sp_mat& m, int ncores=1,bool verbose=false)
+{
+  typedef arma::sp_mat::const_col_iterator iter;
+  typedef arma::sp_mat::const_row_col_iterator iter2;
+  
+  arma::sp_mat d(m.n_rows,m.n_cols);
+  d.zeros();
+  arma::vec totV(m.n_cols,arma::fill::zeros);
+  arma::vec medianV(m.n_cols,arma::fill::zeros);
+  Progress p(m.n_cols, verbose);
+  
+#pragma omp parallel for num_threads(ncores) shared(totV)
+  for(unsigned int i=0;i<m.n_cols;i++) {
+    if ( !Progress::check_abort())
+    {
+      double tot=0; int n=0;
+      for(iter i_iter = m.begin_col(i); i_iter != m.end_col(i); ++i_iter) {
+        tot+=(*i_iter);
+      }
+      totV(i) = tot;
+      p.increment(); // update progress
+    }
+  }
+  
+  
+  //medianV = arma::median(arma::mat(m),1);
+  
+  Progress p2(m.n_nonzero, verbose);
+#pragma omp parallel for num_threads(ncores) shared(d)
+  for(unsigned int i=0;i<m.n_cols;i++) {
+    if ( !Progress::check_abort())
+    {
+      for(iter i_iter = m.begin_col(i); i_iter != m.end_col(i); ++i_iter) {
+        d(i_iter.row(),i) = log10( (*i_iter) * 1000000 / totV(i) + 1);
+        p2.increment(); // update progress
+      }
+    }
+  }
+  
+  return(d);
+}
+

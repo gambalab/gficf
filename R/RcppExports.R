@@ -33,6 +33,10 @@ armaColMeans <- function(m, ncores = 1L, verbose = TRUE) {
     .Call(`_gficf_armaColMeans`, m, ncores, verbose)
 }
 
+scaleUMI <- function(m, ncores = 1L, verbose = FALSE) {
+    .Call(`_gficf_scaleUMI`, m, ncores, verbose)
+}
+
 rcpp_WMU_test <- function(M, idx1, idx2) {
     .Call(`_gficf_rcpp_WMU_test`, M, idx1, idx2)
 }

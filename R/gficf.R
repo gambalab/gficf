@@ -21,7 +21,7 @@
 #' @return The updated gficf object.
 #' 
 #' @export
-gficf = function(M=NULL,QCdata=NULL,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalize=TRUE,storeRaw=TRUE,batches=NULL,groups=NULL,filterGenes=TRUE,verbose=TRUE, ...)
+gficf = function(M=NULL,QCdata=NULL,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalize=TRUE,storeRaw=TRUE,batches=NULL,groups=NULL,filterGenes=TRUE,verbose=TRUE,fastNomalization=F, ...)
 {
   if(is.null(M) & is.null(QCdata)) {stop("Input data is missing!!")}
   
@@ -34,7 +34,7 @@ gficf = function(M=NULL,QCdata=NULL,cell_count_cutoff=5,cell_percentage_cutoff2=
     data$counts = M;rm(M);gc()
   }
   
-  data = normCountsData(data,cell_count_cutoff,cell_percentage_cutoff2,nonz_mean_cutoff,normalize,batches,groups,verbose,filterGenes, ...)
+  data = normCountsData(data,cell_count_cutoff,cell_percentage_cutoff2,nonz_mean_cutoff,normalize,batches,groups,verbose,filterGenes,fastNomalization, ...)
   data$gficf = tf(data$rawCounts,verbose = verbose)
   if (!storeRaw) {data$rawCounts=NULL;data$counts=NULL;gc()}
   data$w = getIdfW(data$gficf,verbose = verbose)
@@ -53,7 +53,7 @@ gficf = function(M=NULL,QCdata=NULL,cell_count_cutoff=5,cell_percentage_cutoff2=
 #' @importFrom edgeR DGEList calcNormFactors cpm
 #' @importFrom sva ComBat_seq
 #' 
-normCounts = function(M,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalizeCounts=TRUE,batches=NULL,groups=NULL,verbose=TRUE,filterGene=FALSE, ...)
+normCounts = function(M,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalizeCounts=TRUE,batches=NULL,groups=NULL,verbose=TRUE,filterGene=FALSE,fastNomalization=FALSE, ...)
 {
   if (filterGene) {
     tsmessage("Gene filtering..",verbose = verbose)
@@ -67,7 +67,12 @@ normCounts = function(M,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_me
       M = Matrix::Matrix(data = sva::ComBat_seq(counts = as.matrix(M),batch = batches,group = groups, ...),sparse = T)
     }
     tsmessage("Normalize counts..",verbose = verbose)
-    M <- Matrix::Matrix(edgeR::cpm(edgeR::calcNormFactors(edgeR::DGEList(counts=M),normalized.lib.sizes = T)),sparse = T) 
+    if (!fastNomalization) {
+      M <- Matrix::Matrix(edgeR::cpm(edgeR::calcNormFactors(edgeR::DGEList(counts=M),normalized.lib.sizes = T)),sparse = T)
+    } else {
+      nt = ifelse(detectCores()>1,detectCores()-1,1)
+      M <- scaleUMI(F,nt,F)
+    }
   } else {
     data$rawCounts <- data$counts
     data$counts <- NULL; gc()
@@ -80,7 +85,7 @@ normCounts = function(M,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_me
 #' @importFrom edgeR DGEList calcNormFactors cpm
 #' @importFrom sva ComBat_seq
 #' 
-normCountsData = function(data,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalizeCounts=TRUE,batches=NULL,groups=NULL,verbose=TRUE,filterGene= TRUE, ...)
+normCountsData = function(data,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,nonz_mean_cutoff=1.12,normalizeCounts=TRUE,batches=NULL,groups=NULL,verbose=TRUE,filterGene=TRUE, fastNomalization=FALSE, ...)
 {
   if (filterGene) {
     tsmessage("Gene filtering..",verbose = verbose)
@@ -95,7 +100,12 @@ normCountsData = function(data,cell_count_cutoff=5,cell_percentage_cutoff2=0.03,
       gc()
     }
     tsmessage("Normalize counts..",verbose = verbose)
-    data$rawCounts <- Matrix::Matrix(edgeR::cpm(edgeR::calcNormFactors(edgeR::DGEList(counts=data$counts),normalized.lib.sizes = T)),sparse = T) 
+    if (!fastNomalization) {
+      data$rawCounts <- Matrix::Matrix(edgeR::cpm(edgeR::calcNormFactors(edgeR::DGEList(counts=data$counts),normalized.lib.sizes = T)),sparse = T)
+    } else {
+      nt = ifelse(detectCores()>1,detectCores()-1,1)
+      data$rawCounts <- scaleUMI(data$counts,nt,F)
+    }
   } else {
     data$rawCounts <- data$counts
     data$counts <- NULL; gc()
