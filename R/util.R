@@ -159,7 +159,7 @@ filter_genes_cell2loc_style = function(data,cell_count_cutoff=5,cell_percentage_
   data = data[armaRowSum(data)>0,]
   csums = armaRowSum(data!=0)
   gene_to_remove = csums <= cell_count_cutoff |  csums/ncol(data) <= cell_percentage_cutoff2
-  gene_to_remove = gene_to_remove & armaColMeans(t(data),nt,FALSE)$mu1 < nonz_mean_cutoff
+  gene_to_remove = gene_to_remove & armaColMeans(t(data),nt,FALSE)$mu1 <= nonz_mean_cutoff
   data = data[!gene_to_remove,]
   return(data)
 }
