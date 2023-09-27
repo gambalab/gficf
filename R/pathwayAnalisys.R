@@ -191,9 +191,9 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
       if (!is.null(data$pca) && data$pca$type == "NMF"){
         if (data$dimPCA<nmf.k || data$pca$use.odgenes) {
           tsmessage("... Performing NMF",verbose=verbose)
-          tmp = RcppML::nmf(data = data$gficf,k=nmf.k)
-          data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-          data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+          tmp = RcppML::nmf(data$gficf,k=nmf.k)
+          data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+          data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
           rm(tmp);gc()
         } else {
           tsmessage(paste0("Found NMF reduction with k greaten or equal to ", nmf.k),verbose=T)
@@ -205,16 +205,16 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
         }
       } else {
         tsmessage("... Performing NMF",verbose=verbose)
-        tmp = RcppML::nmf(data = data$gficf,k=nmf.k)
-        data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-        data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+        tmp = RcppML::nmf(data$gficf,k=nmf.k)
+        data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+        data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
         rm(tmp);gc()
       }
     } else {
       tsmessage("... Performing NMF",verbose=verbose)
-      tmp = RcppML::nmf(data = log1p(data$rawCounts),k=nmf.k)
-      data$scgsea$nmf.w <- Matrix::Matrix(data = tmp@w,sparse = T)
-      data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp@h,sparse = T))
+      tmp = RcppML::nmf(log1p(data$rawCounts),k=nmf.k)
+      data$scgsea$nmf.w <- Matrix::Matrix(data = tmp$w,sparse = T)
+      data$scgsea$nmf.h <- t(Matrix::Matrix(data = tmp$h,sparse = T))
       rm(tmp);gc()
     }
   } else {
@@ -244,7 +244,8 @@ runScGSEA <- function(data,geneID,species,category,subcategory=NULL,pathway.list
   data$scgsea$nes = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
   data$scgsea$pval = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
   data$scgsea$fdr = Matrix::Matrix(data = 0,nrow = length(data$scgsea$pathways),ncol = ncol(data$scgsea$nmf.w))
-    
+  
+  rownames(data$scgsea$nmf.w) <- rownames(data$rawCounts)
   rownames(data$scgsea$es) = rownames(data$scgsea$nes) = rownames(data$scgsea$pval) = rownames(data$scgsea$fdr) = names(data$scgsea$pathways)
   
   tsmessage("Performing GSEA...",verbose=verbose)
